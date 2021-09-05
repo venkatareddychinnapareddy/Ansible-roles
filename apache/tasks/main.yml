@@ -1,0 +1,20 @@
+---
+- name: Installing apache
+  yum:
+    name: httpd
+    state: present
+
+  notify:
+    - start apache service
+
+
+- name: Copy the file
+  copy:
+    src: hello.txt
+    dest: /opt
+
+
+- name: change the port numbeer for apache
+  template:
+    src: httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf

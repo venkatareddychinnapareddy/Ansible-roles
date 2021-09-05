@@ -1,0 +1,54 @@
+---
+- name: install apache 
+  apt: name=apache2 state=latest
+
+- name: copy conf to /etc/apache2/conf-available/
+  copy: src={{ item.src }} dest=/etc/apache2/conf-available/{{ item.name | default((item.src | basename | splitext)[0]) }}.conf owner=root group=root mode=0644
+  with_items: "{{ apache_conf_available }}"
+  notify: reload apache
+
+- name: copy sites to /etc/apache2/sites-available/
+  copy: src={{ item.src }} dest=/etc/apache2/sites-available/{{ item.name | default((item.src | basename | splitext)[0]) }}.conf owner=root group=root mode=0644
+  with_items: "{{ apache_sites_available }}"
+  notify: reload apache
+
+- name: disable mods
+  apache2_module: name={{ item }} state=absent
+  with_items: "{{ apache_mods_disabled }}"
+  notify: reload apache
+
+- name: enable mods
+  apache2_module: name={{ item }} state=present ignore_configcheck=yes
+  with_items: "{{ apache_mods_enabled }}"
+  notify: reload apache
+
+- name: disable conf
+  command: a2disconf {{ item }}
+  with_items: "{{ apache_conf_disabled }}"
+  register: a2disconf
+  changed_when: "'already disabled' not in a2disconf.stdout"
+  notify: reload apache
+
+- name: enable conf
+  command: a2enconf {{ item }}
+  with_items: "{{ apache_conf_enabled }}"
+  register: a2enconf
+  changed_when: "'already enabled' not in a2enconf.stdout"
+  notify: reload apache
+
+- name: disable sites
+  command: a2dissite {{ item }}
+  with_items: "{{ apache_sites_disabled }}"
+  register: a2dissite
+  changed_when: "'already disabled' not in a2dissite.stdout"
+  notify: reload apache
+
+- name: enable sites
+  command: a2ensite {{ item }}
+  with_items: "{{ apache_sites_enabled }}"
+  register: a2ensite
+  changed_when: "'already enabled' not in a2ensite.stdout"
+  notify: reload apache
+
+- include: vagrant.yml
+  when: is_vagrant is defined and is_vagrant

@@ -1,0 +1,14 @@
+---
+- name: add user `www-data` to group `vagrant`
+  user: name=www-data groups=vagrant append=yes
+  notify: restart apache
+
+- name: allow access to /server-info
+  lineinfile: dest=/etc/apache2/mods-enabled/info.conf regexp="Require ip" line="\t\tRequire ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+  when: "'info' in apache_mods_enabled"
+  notify: reload apache
+
+- name: allow access to /server-status
+  lineinfile: dest=/etc/apache2/mods-enabled/status.conf regexp="Require ip" line="\t\tRequire ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+  when: "'status' in apache_mods_enabled"
+  notify: reload apache

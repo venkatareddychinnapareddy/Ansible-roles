@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Chris Coleman
+  description: Apache 2.4 for Ubuntu 16.04
+  company: SwissMadeMarketing GmbH
+  license: BSD
+  min_ansible_version: 2.1
+  platforms:
+  - name: Ubuntu
+    versions:
+    - xenial
+  galaxy_tags:
+    - development
+    - web
+
+dependencies: []
